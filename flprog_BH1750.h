@@ -110,46 +110,47 @@
 
 #define FLPROG_BH1750_NOT_ERROR 0
 
+
 class FLProgBH1750
 {
 public:
-    FLProgBH1750(FLProgI2C *device, uint8_t i2c_address = FLPROG_BH1750_DEFAULT_I2CADDR);
-    void pool();
-    float getSensitivity() { return currentSensitivity; };
-    float getCalibration() { return accuracy; };
-    float getLightLevel() { return lightLevel; };
-    void power(bool power);
-    void reset();
-     void read();
-    uint8_t getError() { return codeError; };
-    void sensitivity(float sensitivity);
-    void calibration(float newAccuracy);
-    void setReadPeriod(uint32_t period);
+  FLProgBH1750(FLProgI2C *device, uint8_t i2c_address = FLPROG_BH1750_DEFAULT_I2CADDR);
+  void pool();
+  float getSensitivity() { return currentSensitivity; };
+  float getCalibration() { return accuracy; };
+  float getLightLevel() { return lightLevel; };
+  void power(bool power);
+  void reset();
+  void read();
+  uint8_t getError() { return codeError; };
+  void sensitivity(float sensitivity);
+  void calibration(float newAccuracy);
+  void setReadPeriod(uint32_t period);
 
 private:
-    bool setSensitivity();
-    void checkDelay();
-    void createError();
-    void readSensor();
-    void readSensor1();
-    void setPower();
-    void resetSensor();
-    FLProgI2C *i2cDevice;
-    uint8_t step = FLPROG_BH1750_WAITING_READ_STEP;
-    uint32_t startDelay;
-    uint32_t sizeDelay;
-    uint8_t stepAfterDelay;
-    uint8_t sensorResolution = FLPROG_BH1750_ONE_TIME_HIGH_RES_MODE;
-    float currentSensitivity = 0;
-    float newSensitivity = FLPROG_BH1750_SENSITIVITY_DEFAULT;
-    float accuracy = FLPROG_BH1750_ACCURACY_DEFAULT;
-    uint8_t sensorAddress;
-    bool isNeededRead = true;
-    bool isNeededReset = false;
-    bool currentPower = true;
-    bool newPower = true;
-    uint8_t codeError = FLPROG_BH1750_NOT_ERROR;
-    float lightLevel;
-    uint32_t readPeriod = 0;
-    uint32_t startReadPeriod = 0;
+  bool setSensitivity();
+  void checkDelay();
+  void createError();
+  void readSensor();
+  void readSensor1();
+  void setPower();
+  void resetSensor();
+  FLProgI2C *i2cDevice;
+  uint8_t step = FLPROG_BH1750_WAITING_READ_STEP;
+  uint32_t startDelay;
+  uint32_t sizeDelay;
+  uint8_t stepAfterDelay;
+  uint8_t sensorResolution = FLPROG_BH1750_ONE_TIME_HIGH_RES_MODE;
+  float currentSensitivity = 0;
+  float newSensitivity = FLPROG_BH1750_SENSITIVITY_DEFAULT;
+  float accuracy = FLPROG_BH1750_ACCURACY_DEFAULT;
+  uint8_t sensorAddress;
+  bool isNeededRead = true;
+  bool isNeededReset = false;
+  bool currentPower = true;
+  bool newPower = true;
+  uint8_t codeError = FLPROG_BH1750_NOT_ERROR;
+  float lightLevel;
+  uint32_t readPeriod = 0;
+  uint32_t startReadPeriod = 0;
 };
