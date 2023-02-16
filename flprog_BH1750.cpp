@@ -3,40 +3,19 @@
 FLProgBH1750::FLProgBH1750(FLProgI2C *device, uint8_t i2c_address)
 {
     i2cDevice = device;
-    sensorAddress = i2c_address;
-}
-
-void FLProgBH1750::checkDelay()
-{
-    if (flprog::isTimer(startDelay, sizeDelay))
-    {
-        step = stepAfterDelay;
-    }
+    addres = i2c_address;
 }
 
 void FLProgBH1750::createError()
 {
-    startDelay = millis();
-    sizeDelay = 500;
-    stepAfterDelay = FLPROG_BH1750_WAITING_READ_STEP;
-    step = FLPROG_BH1750_WAITING_DELAY;
+    gotoStepWithDelay(FLPROG_SENSOR_WAITING_READ_STEP, 500);
 }
 
 void FLProgBH1750::pool()
 {
-    if (readPeriod > 0)
-    {
-        if (flprog::isTimer(startReadPeriod, readPeriod))
-        {
-            startReadPeriod = millis();
-            read();
-        }
-    }
-    if (step == FLPROG_BH1750_WAITING_DELAY)
-    {
-        checkDelay();
-    }
-    if (step == FLPROG_BH1750_WAITING_READ_STEP)
+    checkReadPeriod();
+    checkDelay();
+    if (step == FLPROG_SENSOR_WAITING_READ_STEP)
     {
         if (isNeededReset)
         {
@@ -57,12 +36,7 @@ void FLProgBH1750::pool()
                 }
                 else
                 {
-
-                    if (isNeededRead)
-                    {
-                        readSensor();
-                        isNeededRead = false;
-                    }
+                    checkNeededRead();
                 }
             }
         }
@@ -91,13 +65,13 @@ bool FLProgBH1750::setSensitivity()
     measurnentTimeLowBit >>= 3;                                // 0,0,0,4-bit  3-bit,2-bit,1-bit,0-bit
     measurnentTimeLowBit |= FLPROG_BH1750_MEASUREMENT_TIME_L;  // 0,1,1,4-bit  3-bit,2-bit,1-bit,0-bit
     /* update sensor MTreg register */
-    codeError = i2cDevice->fullWrite(sensorAddress, measurnentTimeHighBit);
+    codeError = i2cDevice->fullWrite(addres, measurnentTimeHighBit);
     if (codeError)
     {
         createError();
         return false;
     }
-    codeError = i2cDevice->fullWrite(sensorAddress, measurnentTimeLowBit);
+    codeError = i2cDevice->fullWrite(addres, measurnentTimeLowBit);
     if (codeError)
     {
         createError();
@@ -110,7 +84,7 @@ bool FLProgBH1750::setSensitivity()
 void FLProgBH1750::readSensor()
 {
     uint32_t delay = 0;
-    codeError = i2cDevice->fullWrite(sensorAddress, sensorResolution);
+    codeError = i2cDevice->fullWrite(addres, sensorResolution);
     if (codeError)
     {
         createError();
@@ -126,16 +100,13 @@ void FLProgBH1750::readSensor()
         delay = currentSensitivity * 24; // integration time = (0.45..3.68) * 16..24msec -> 10msec/100Hz..88msec/11Hz (default 24msec/42Hz)
         break;
     }
-    startDelay = millis();
-    sizeDelay = delay;
-    stepAfterDelay = FLPROG_BH1750_READ_SENSOR_STEP1;
-    step = FLPROG_BH1750_WAITING_DELAY;
+    gotoStepWithDelay(FLPROG_BH1750_READ_SENSOR_STEP1, delay);
 }
 
 void FLProgBH1750::readSensor1()
 {
     uint8_t temp[2];
-    codeError = i2cDevice->fullRead(sensorAddress, temp, 2);
+    codeError = i2cDevice->fullRead(addres, temp, 2);
     if (codeError)
     {
         createError();
@@ -154,7 +125,7 @@ void FLProgBH1750::readSensor1()
         lightLevel = (float)rawLightLevel / accuracy * currentSensitivity; // 1.00 lux & 4.00 lux resolution
         break;
     }
-    step = FLPROG_BH1750_WAITING_READ_STEP;
+    step = FLPROG_SENSOR_WAITING_READ_STEP;
 }
 
 void FLProgBH1750::power(bool power)
@@ -166,11 +137,11 @@ void FLProgBH1750::setPower()
 {
     if (newPower)
     {
-        codeError = i2cDevice->fullWrite(sensorAddress, FLPROG_BH1750_POWER_ON);
+        codeError = i2cDevice->fullWrite(addres, FLPROG_BH1750_POWER_ON);
     }
     else
     {
-        codeError = i2cDevice->fullWrite(sensorAddress, FLPROG_BH1750_POWER_DOWN);
+        codeError = i2cDevice->fullWrite(addres, FLPROG_BH1750_POWER_DOWN);
     }
     if (codeError)
     {
@@ -188,7 +159,7 @@ void FLProgBH1750::reset()
 
 void FLProgBH1750::resetSensor()
 {
-    codeError = i2cDevice->fullWrite(sensorAddress, FLPROG_BH1750_RESET);
+    codeError = i2cDevice->fullWrite(addres, FLPROG_BH1750_RESET);
     if (codeError)
     {
         createError();
@@ -219,14 +190,4 @@ void FLProgBH1750::resetSensor()
 void FLProgBH1750::calibration(float newAccuracy)
 {
     accuracy = constrain(accuracy, FLPROG_BH1750_ACCURACY_MIN, FLPROG_BH1750_ACCURACY_MAX); // accuracy range 0.96..1.44
-}
-
-void FLProgBH1750::setReadPeriod(uint32_t period)
-{
-    readPeriod = period;
-}
-
-void FLProgBH1750::read()
-{
-    isNeededRead = true;
 }
