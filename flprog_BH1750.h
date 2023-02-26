@@ -69,6 +69,7 @@
 #pragma once
 #include "Arduino.h"
 #include "flprogUtilites.h"
+#include "flprogI2C.h"
 
 #define FLPROG_BH1750_POWER_DOWN 0x00         // low power state register
 #define FLPROG_BH1750_POWER_ON 0x01           // wake-up & wating for measurment command register
