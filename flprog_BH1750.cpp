@@ -1,6 +1,6 @@
 #include "flprog_BH1750.h"
 
-FLProgBH1750::FLProgBH1750(FLProgI2C *device, uint8_t i2c_address)
+FLProgBH1750::FLProgBH1750(AbstractFLProgI2C *device, uint8_t i2c_address)
 {
     i2cDevice = device;
     addres = i2c_address;

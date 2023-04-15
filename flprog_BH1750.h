@@ -110,7 +110,7 @@
 class FLProgBH1750 : public FLProgI2cStepWorkSensor
 {
 public:
-  FLProgBH1750(FLProgI2C *device, uint8_t i2c_address = FLPROG_BH1750_DEFAULT_I2CADDR);
+  FLProgBH1750(AbstractFLProgI2C *device, uint8_t i2c_address = FLPROG_BH1750_DEFAULT_I2CADDR);
   void pool();
   float getSensitivity() { return currentSensitivity; };
   float getCalibration() { return accuracy; };
